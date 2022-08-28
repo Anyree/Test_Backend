@@ -75,12 +75,8 @@ public class ComplexSearchTest extends AbstractTest {
                 .formParam("title","Corned Beef and Cabbage")
                 .post(getBaseUrl()+"recipes/cuisine")
                 .then()
-                .extract()
-                .response()
                 .body(contains("Irish"))
                 .spec(responseSpecification);
-
-
 
         given().spec(requestSpecification)
                 .when()
