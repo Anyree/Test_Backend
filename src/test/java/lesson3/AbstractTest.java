@@ -1,5 +1,12 @@
 package lesson3;
 
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.io.FileInputStream;
@@ -13,14 +20,38 @@ public abstract class AbstractTest {
     private static InputStream configFile;
     private static String apiKey;
     private static String baseUrl;
+    protected static ResponseSpecification responseSpecification;
+    protected static RequestSpecification requestSpecification;
+    protected static RequestSpecification requestSpecification2;
 
     @BeforeAll
     static void initTest() throws IOException {
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
         configFile = new FileInputStream("src/main/resources/properties.properties");
         prop.load(configFile);
 
         apiKey = prop.getProperty("apiKey");
         baseUrl= prop.getProperty("base_url");
+
+        responseSpecification = new ResponseSpecBuilder()
+                .expectStatusCode(200)
+                .expectStatusLine("HTTP/1.1 200 OK")
+                .expectContentType(ContentType.JSON)
+                .expectResponseTime(Matchers.lessThan(2000L))
+                .build();
+
+        requestSpecification = new RequestSpecBuilder()
+                .addQueryParam("apiKey", apiKey)
+                .build();
+
+        requestSpecification2 = new RequestSpecBuilder()
+                .addQueryParam("apiKey", apiKey)
+                .setContentType("application/x-www-form-urlencoded")
+                .build();
+
+        RestAssured.responseSpecification = responseSpecification;
+        RestAssured.requestSpecification = requestSpecification;
+
     }
 
     public static String getApiKey() {
@@ -29,6 +60,10 @@ public abstract class AbstractTest {
 
     public static String getBaseUrl() {
         return baseUrl;
+    }
+
+    public RequestSpecification getRequestSpecification(){
+        return requestSpecification;
     }
 }
 

@@ -4,6 +4,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.lessThan;
 
@@ -11,103 +12,91 @@ public class ComplexSearchTest extends AbstractTest {
 
     @Test
     void getComplexSearchTest() {
-        given()
-                .queryParam("apiKey", getApiKey())
+        given().spec(getRequestSpecification())
                 .queryParam("cuisine", "african")
                 .when()
                 .get(getBaseUrl()+"recipes/complexSearch")
                 .then()
-                .statusCode(200);
+                .spec(responseSpecification);
 
-        given()
-                .queryParam("apiKey", getApiKey())
+        given().spec(getRequestSpecification())
                 .queryParam("query", "pasta")
                 .when()
                 .get(getBaseUrl()+"recipes/complexSearch")
                 .then()
-                .statusLine("HTTP/1.1 200 OK");
+                .spec(responseSpecification);
 
 
-        given()
-                .queryParam("apiKey", getApiKey())
+        given().spec(getRequestSpecification())
                 .queryParam("excludeCuisine", "greek")
                 .when()
                 .get(getBaseUrl()+"recipes/complexSearch")
                 .then()
-                .contentType(ContentType.JSON);
+                .spec(responseSpecification);
 
-        given()
-                .queryParam("apiKey", getApiKey())
+        given().spec(getRequestSpecification())
                 .queryParam("diet", "diet")
                 .when()
                 .get(getBaseUrl()+"recipes/complexSearch")
                 .then()
-                .time(lessThan(2000L));
+                .spec(responseSpecification);
 
-        given()
-                .queryParam("apiKey", getApiKey())
+        given().spec(getRequestSpecification())
                 .queryParam("intolerances", "gluten")
                 .when()
                 .get(getBaseUrl()+"recipes/complexSearch")
                 .then()
-                .body(contains("Cauliflower"));
+                .spec(responseSpecification);
 
     }
 
     @Test
     void postRecipesCuisineTest() {
 
-        given()
-                .queryParam("apiKey", getApiKey())
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("title","African Bean Soup")
+        given().spec(requestSpecification)
                 .when()
+                .formParam("title","African Bean Soup")
                 .post(getBaseUrl()+"recipes/cuisine")
                 .then()
-                .time(lessThan(2000L))
-                .statusCode(200);
+                .spec(responseSpecification);
 
-        given()
-                .queryParam("apiKey", getApiKey())
+        given().spec(requestSpecification)
+                .when()
                 .queryParam("language", "en")
-                .contentType("application/x-www-form-urlencoded")
                 .formParam("title","Baked Swedish Pancake")
-                .when()
                 .post(getBaseUrl()+"recipes/cuisine")
                 .then()
-                .statusCode(200)
-                .body(contains("Nordic"));
+                .body(contains("Nordic"))
+                .spec(responseSpecification);
 
 
-        given()
-                .queryParam("apiKey", getApiKey())
-                .contentType("application/x-www-form-urlencoded")
+        given().spec(requestSpecification)
+                .when()
                 .formParam("title","Corned Beef and Cabbage")
-                .when()
                 .post(getBaseUrl()+"recipes/cuisine")
                 .then()
+                .extract()
+                .response()
                 .body(contains("Irish"))
-                .statusCode(200);
+                .spec(responseSpecification);
 
-        given()
-                .queryParam("apiKey", getApiKey())
-                .queryParam("language", "de")
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("title","African Bean Soup")
+
+
+        given().spec(requestSpecification)
                 .when()
+                .queryParam("language", "de")
+                .formParam("title","African Bean Soup")
                 .post(getBaseUrl()+"recipes/cuisine")
                 .then()
-                .statusCode(200);
+                .spec(responseSpecification);
 
-        given()
-                .queryParam("apiKey", getApiKey())
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("title","Mango Fried Rice")
+        given().spec(requestSpecification)
                 .when()
+                .formParam("title","Mango Fried Rice")
                 .post(getBaseUrl()+"recipes/cuisine")
                 .then()
                 .body(contains("Chinese"))
-                .statusCode(200);
+                .spec(responseSpecification);
     }
 
     @Test
